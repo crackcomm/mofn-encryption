@@ -1,5 +1,6 @@
 import base64
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
 
 
 def private_bytes(private_key):
@@ -22,6 +23,10 @@ def b64_encode_private(private_key):
         format=serialization.PrivateFormat.Raw,
         encryption_algorithm=serialization.NoEncryption()
     ))
+
+
+def exchange_key(private_key, public_key):
+    return X25519PrivateKey.from_private_bytes(private_key).exchange(public_key)
 
 
 def print_key(private_key):

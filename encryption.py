@@ -5,27 +5,21 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
-from util import print_key, public_bytes
+from util import print_key, public_bytes, exchange_key
 from keys import secret_alice, secret_bob, secret_joe, ephemeral_key
 
 # We have only access to 3 public keys and we have to compute secrets for them.
 # Use ephemeral key to generate shared keys which public parts are shared.
 # Public parts of these keys are shared in the encrypted blob header.
-shared_alice = X25519PrivateKey.from_private_bytes(
-    ephemeral_key.exchange(secret_alice.public_key()))
-shared_bob = X25519PrivateKey.from_private_bytes(
-    ephemeral_key.exchange(secret_bob.public_key()))
-shared_joe = X25519PrivateKey.from_private_bytes(
-    ephemeral_key.exchange(secret_joe.public_key()))
+shared_alice = exchange_key(ephemeral_key, secret_alice.public_key())
+shared_bob = exchange_key(ephemeral_key, secret_bob.public_key())
+shared_joe = exchange_key(ephemeral_key, secret_joe.public_key())
 
 # We are now beholding 3 keys and each separately is known only to us  and owner of the secret counterpart.
 # We can now initialize a handshake to generate 3 shared secret keys.
-shared_alice_bob = X25519PrivateKey.from_private_bytes(
-    shared_alice.exchange(shared_bob.public_key()))
-shared_alice_joe = X25519PrivateKey.from_private_bytes(
-    shared_alice.exchange(shared_joe.public_key()))
-shared_bob_joe = X25519PrivateKey.from_private_bytes(
-    shared_bob.exchange(shared_joe.public_key()))
+shared_alice_bob = exchange_key(shared_alice, shared_bob.public_key())
+shared_alice_joe = exchange_key(shared_alice, shared_joe.public_key())
+shared_bob_joe = exchange_key(shared_bob, shared_joe.public_key())
 
 # This is the point when we can start constructing encryption secret.
 ephemeral_alice_joe = shared_alice_joe.exchange(ephemeral_key.public_key())

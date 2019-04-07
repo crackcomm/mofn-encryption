@@ -5,7 +5,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
-from util import print_key, public_bytes
+from util import print_key, public_bytes, exchange_key
 from keys import secret_alice, secret_bob, secret_joe, ephemeral_key
 
 # From encrypted file import shared public keys.
@@ -22,12 +22,11 @@ shared_alice_bob = shared_alice.exchange(shared_bob.public_key())
 shared_bob_joe = shared_joe.exchange(shared_bob.public_key())
 
 # This is the point when we can start constructing encryption secret.
-ephemeral_alice_joe = X25519PrivateKey.from_private_bytes(
-    shared_alice_joe).exchange(ephemeral_key.public_key())
-ephemeral_alice_bob = X25519PrivateKey.from_private_bytes(
-    shared_alice_bob).exchange(ephemeral_key.public_key())
-ephemeral_bob_joe = X25519PrivateKey.from_private_bytes(
-    shared_bob_joe).exchange(ephemeral_key.public_key())
+ephemeral_alice_joe = exchange_key(
+    shared_alice_joe, ephemeral_key.public_key())
+ephemeral_alice_bob = exchange_key(
+    shared_alice_bob, ephemeral_key.public_key())
+ephemeral_bob_joe = exchange_key(shared_bob_joe, ephemeral_key.public_key())
 
 
 def main():
